@@ -127,8 +127,10 @@
 #define REAPERAPI_WANT_Track_GetPeakHoldDB
 #define REAPERAPI_WANT_Master_GetPlayRate
 #define REAPERAPI_WANT_ShowPopupMenu
+#define REAPERAPI_WANT_ShowMessageBox
 #include <reaper/reaper_plugin.h>
 #include <reaper/reaper_plugin_functions.h>
+#include "surface.h"
 
 // Needed for REAPER API functions which take a bool as an input pointer.
 static bool bFalse = false;
