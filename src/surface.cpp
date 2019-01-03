@@ -12,6 +12,10 @@
 #include <algorithm>
 #include "osara.h"
 
+// from reaper_osara.cpp
+void postGoToTrack(int command);
+bool isTrackMuted(MediaTrack* track);
+
 class Surface : public IReaperControlSurface {
 public:
 	static Surface *CreateInstance() {
@@ -36,13 +40,66 @@ public:
 	const char* GetConfigString() {
 		return "0"; // empty does not work, this can work as a version
 	}
-	void SetSurfaceMute(MediaTrack *trackid, bool mute) {
+
+	void SetTrackListChange() {
+		// TODO: should we remember all current states here?
 	}
+
+	void SetSurfaceMute(MediaTrack *trackid, bool mute) {
+		m_ChangeType = TRACK_MUTED;
+		m_pChangeTrack = trackid;
+	}
+
+	void OnTrackSelection(MediaTrack *trackid) {
+		m_ChangeType = TRACK_TOUCHED;
+		m_pChangeTrack = trackid;
+	}
+
+	void Run() {
+		switch (m_ChangeType) {
+			case TRACK_TOUCHED:
+				postGoToTrack(0);
+				break;
+			case TRACK_MUTED:
+				outputMessage(isTrackMuted(m_pChangeTrack) ? "muted" : "unmuted");
+				break;
+			default:
+				break;
+				m_ChangeType = NO_CHANGES;
+		}
+		m_ChangeType = NO_CHANGES;
+	}
+
+	void OnTrackLastTouched(MediaTrack *trackid) {
+
+	}
+
+	int Extended(int call, void *parm1, void *parm2, void *parm3) {
+		switch (call) {
+		case CSURF_EXT_SETLASTTOUCHEDTRACK:
+			OnTrackLastTouched(static_cast<MediaTrack *>(parm1));
+			return 1;
+		default:
+			break;
+		}
+		return 0;
+	}
+
 private:
+	static Surface* m_pInstance; // singleton
+
+	enum CHANGE_TYPE {
+		NO_CHANGES = 0,
+		TRACK_TOUCHED,
+		TRACK_MUTED,
+	} m_ChangeType;
+	MediaTrack* m_pChangeTrack;
+
 	Surface() {
 		m_pInstance = this;
+		m_ChangeType = NO_CHANGES;
+		m_pChangeTrack = nullptr;
 	}
-	static Surface* m_pInstance; // singleton
 };
 
 Surface *Surface::m_pInstance = nullptr;

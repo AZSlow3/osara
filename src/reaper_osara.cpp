@@ -80,6 +80,7 @@ string narrow(const wstring& text) {
 string lastMessage;
 HWND lastMessageHwnd = NULL;
 void outputMessage(const string& message) {
+	//ShowMessageBox(message.c_str(), "OSARA", 0);
 	// Tweak the MSAA accName for the current focus.
 	GUITHREADINFO guiThreadInfo;
 	guiThreadInfo.cbSize = sizeof(GUITHREADINFO);
